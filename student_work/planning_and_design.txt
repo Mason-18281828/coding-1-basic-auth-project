@@ -5,6 +5,7 @@ APP PLANNING & DESIGN
 import random
 
 list_of_color_schemes = []
+individual_color_schemes = {}
 
 base_style = """
 <style>
@@ -42,6 +43,84 @@ button {
 </style>
 """
 
+secret_style = """
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #ffc7fc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(192, 31, 171, 0.4);
+    width: 300px;
+    text-align: center;
+}
+input {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+}
+button {
+    padding: 10px;
+    width: 60%;
+    background: #fffb08;
+    color: black;
+    border: none;
+}
+.error {
+    color: red;
+}
+</style>
+"""
+
+def indiv_secret(username):
+    try:
+        x = individual_color_schemes[f'{username}']
+    except:
+        individual_color_schemes[f'{username}'] = random.choice(list_of_color_schemes)
+    
+    secret_style = """
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: individual_color_schemes[f'username'][0];
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px individual_color_schemes[f'username'][1];
+        width: 300px;
+        text-align: center;
+    }
+    input {
+        width: 90%;
+        padding: 8px;
+        margin: 8px 0;
+    }
+    button {
+        padding: 10px;
+        width: 60%;
+        background: individual_color_schemes[f'username'][2];
+        color: black;
+        border: none;
+    }
+    .error {
+        color: red;
+    }
+    </style>
+    """
+
 login_page = f"""{base_style}
 <div class="card">
 <h2>Login</h2>
@@ -68,7 +147,7 @@ register_page = f"""{base_style}
 </div>
 """
 
-secret_page = f"""{base_style}
+secret_page = f"""{secret_style}
 <div class="card">
 <h2>💖🔑Unlocked🔑💖</h2>
 <h3>Welcome, {{{{ username }}}},</h3>
@@ -76,6 +155,9 @@ secret_page = f"""{base_style}
 <a href="/logout"><button>You could logout, but do it later!</button></a>
 </div>
 """
+
+# second-to-last line in login:
+indiv_secret(username)
 
 1. PROJECT NAME & THEME
 -------------------------
