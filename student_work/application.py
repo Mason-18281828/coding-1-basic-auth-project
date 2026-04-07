@@ -7,13 +7,13 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # ---------- DATABASE SETUP ----------
-def get_db():
-    conn = sqlite3.connect("users.db")
+def get_db(name_of_the_base):
+    conn = sqlite3.connect(f"{name_of_the_base}.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-def init_db():
-    conn = get_db()
+def init_db(name_of_the_base):
+    conn = get_db(name_of_the_base)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
@@ -23,14 +23,15 @@ def init_db():
     conn.commit()
     conn.close()
 
-init_db()
+init_db('users')
+init_db('writings')
 
 # ---------- STYLE ----------
 base_style = """
 <style>
 body {
     font-family: Arial, sans-serif;
-    background: #f4f6f8;
+    background: #ffc7fc;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -40,7 +41,7 @@ body {
     background: white;
     padding: 25px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(192, 31, 171, 0.4);
     width: 300px;
     text-align: center;
 }
@@ -52,8 +53,8 @@ input {
 button {
     padding: 10px;
     width: 60%;
-    background: #4CAF50;
-    color: white;
+    background: #fffb08;
+    color: black;
     border: none;
 }
 .error {
@@ -88,12 +89,14 @@ register_page = f"""{base_style}
 </div>
 """
 
+secret_style = ""
+
 secret_page = f"""{base_style}
 <div class="card">
-<h2>🎉 Secret Room</h2>
-<h3>Welcome, {{{{ username }}}}!</h3>
-<p>You got into the secret room!</p>
-<a href="/logout"><button>Logout</button></a>
+<h2>💖🔑Unlocked🔑💖</h2>
+<h3>Welcome, {{{{ username }}}},</h3>
+<p>to MyPrivateLife!</p>
+<a href="/logout"><button>You could logout, but do it later!</button></a>
 </div>
 """
 
@@ -105,7 +108,7 @@ def login():
         username = request.form["username"].strip()
         password = request.form["password"].strip()
 
-        conn = get_db()
+        conn = get_db('users')
         user = conn.execute(
             "SELECT * FROM users WHERE username=?",
             (username,)
@@ -131,7 +134,7 @@ def register():
         if not username or not password:
             error = "Fields cannot be empty"
         else:
-            conn = get_db()
+            conn = get_db('users')
             try:
                 # Hash password with bcrypt
                 hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
