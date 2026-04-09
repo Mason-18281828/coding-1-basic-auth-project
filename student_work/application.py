@@ -2,11 +2,20 @@
 from flask import Flask, request, redirect, url_for, render_template_string, session
 import sqlite3
 import bcrypt
+import re
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # ---------- DATABASE SETUP ----------
+def is_valid_password(password):
+    if (re.search(r"[A-Z]", password) and   # uppercase
+        re.search(r"[a-z]", password) and   # lowercase
+        re.search(r"[0-9]", password) and   # number
+        re.search(r"[^A-Za-z0-9]", password)):  # special char
+        return True
+    return False
+
 def get_db(name_of_the_base):
     conn = sqlite3.connect(f"{name_of_the_base}.db")
     conn.row_factory = sqlite3.Row
@@ -89,14 +98,52 @@ register_page = f"""{base_style}
 </div>
 """
 
-secret_style = ""
+secret_style = """
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #ffc7fc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(192, 31, 171, 0.4);
+    width: 300px;
+    text-align: center;
+}
+input {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+}
+button {
+    padding: 10px;
+    width: 60%;
+    background: #fffb08;
+    color: black;
+    border: none;
+}
+.error {
+    color: red;
+}
+</style>
+"""
 
-secret_page = f"""{base_style}
+secret_page = f"""{secret_style}
 <div class="card">
 <h2>💖🔑Unlocked🔑💖</h2>
 <h3>Welcome, {{{{ username }}}},</h3>
 <p>to MyPrivateLife!</p>
-<a href="/logout"><button>You could logout, but do it later!</button></a>
+<a href="/logout"><button>logout</button></a>
+<form method="POST">
+  <input name="entry of choice"><br>
+  <button type="submit">Which entry?</button>
+</form>
 </div>
 """
 
@@ -133,6 +180,8 @@ def register():
 
         if not username or not password:
             error = "Fields cannot be empty"
+        elif not is_valid_password(password):
+            error = "Password must include uppercase, lowercase, number, and special character"
         else:
             conn = get_db('users')
             try:
@@ -158,9 +207,13 @@ def register():
     return render_template_string(register_page, error=error)
 
 @app.route("/secret")
+# TODO make link for entries in here plus updating writings database
 def secret():
     if "user" not in session:
         return redirect(url_for("login"))
+    # if request.method == "POST":
+    #     return redirect(url_for(""))
+
     return render_template_string(secret_page, username=session["user"])
 
 @app.route("/logout")
